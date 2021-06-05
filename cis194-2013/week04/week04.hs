@@ -23,10 +23,19 @@ data Tree a = Leaf
     deriving (Show, Eq)
 
 foldTree :: [a] -> Tree a
-foldTree = foldr addNode Leaf
+foldTree = foldr insert Leaf
 
-addNode :: a -> Tree a -> Tree a
-addNode _ _ = Leaf
+-- insert new node into Tree with value 
+-- new nodes include 
+insert :: a -> Tree a -> Tree a
+insert x Leaf                 = Node 0 Leaf x Leaf
+insert x (Node h l z r)
+    | height l > height r = Node h l z (insert x r)
+    | height l < height r = Node h (insert x l) z r
+    | otherwise           = Node (1 + max (height l) (height (insert x r)))
+                                 (insert x l) z r
+    where height Leaf = -1
+          height (Node h _ _ _) = h
 
 
 -- Exersice 3
@@ -43,7 +52,7 @@ myFoldl f base xs = f base (head xs)
 
 -- Exercise 4
 sieveSundaram :: Integer -> [Integer]
-sieveSundaram _ = []
+sieveSundaram n = map (\x -> 2*x + 1) $ filter (\x -> notElem x (vals n)) [1..n]
 
-cartProd :: [a] -> [b] -> [(a,b)]
-cartProd xs ys = [(x,y) | x <- xs, y <- ys]
+vals :: Integer -> [Integer]
+vals n = [i + j + 2*i*j | i <- [1..n], j <- [1..n], 1 <= i && i <= j, i + j + 2*i*j <= n]
